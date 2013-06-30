@@ -1,25 +1,25 @@
-<CENTER> 从头构建cubieboard Debian系统 </CENTER>
+<CENTER> 从头构建 Cubieboard2 Debian系统 </CENTER>
 =============================================
 [http://onefishum.blog.163.com/blog/static/5184730520131151385937/](http://onefishum.blog.163.com/blog/static/5184730520131151385937/)
 
 ### *定义及标准：*
 
-*1. 所有操作基于ubuntu 12.10 root用户。*   
+*1. 所有操作基于 ubuntu 13.04 root用户。*   
 *2. 所有备注用斜体字体。*  
 *3. 用户命令输入使用粗斜体。*  
 *4. 硬盘至少4G以上的剩余空间。*  
 *5. TF卡512M以上*  
-*6. 教程制做内核版本为Linux-3.0.62+*  
+*6. 教程制做内核版本为Linux-3.3+*  
 *7. 默认路径为/root目录。*
 
 
 ### *更新：*  
 *1.1版本*  
-*发现linux分区兼容性。一些杂牌卡，可能分区会有问题，尽量用品牌。此问题为linux下分区软件的问题。本文使用为sandisk的卡。*
+*发现 linux 分区兼容性。一些杂牌卡，可能分区会有问题，尽量用品牌。此问题为linux下分区软件的问题。本文使用为 Lexar 的卡。*
 
 
 
-**1．在ubuntu下安装如下软件，主要用于编译源码及基础系统安装**
+**1．在 ubuntu 下安装如下软件，主要用于编译源码及基础系统安装**
 
  # ***apt-get install build-essential u-boot-tools qemu-user-static debootstrapemdebian-archive-keyring git libusb-1.0-0-dev pkg-config***  
  # ***apt-get install gcc-arm-linux-gnueabihf*** ; pc 交差编译arm 系统。
