@@ -29,71 +29,22 @@
 a. 插上TF卡后  
 查看TF信息
 
- # ***ls /dev/mmcblk0****  
+ # ***ls /dev/sdb****  
 ```
-/dev/mmcblk0  /dev/mmcblk0p1
+/dev/sdb  /dev/sdb1  /dev/sdb2
 ```
-
+*註：mmcblk0/mmcblk0p1/mmcblk0p2 是當掛載到 Cubieboard 上的掛載點，是固定的。在 ubuntu 下應該為 sdb/sdb1/sdb2
 *注：可能你的显示不是以下信息。但至少有/dev/mmcblk0，说明你的tf已经被系统实别。注意，ubuntu系统默认有TF插入后会自动mount，请弹出不
 要挂载目录，以免无法进行以下操作。*
 
- # ***dd if=/dev/zero of=/dev/mmcblk0 bs=1M count=1***  
+ # ***dd if=/dev/zero of=/dev/sdb bs=1M count=1***  
 ```
 记录了1+0 的读入
 记录了1+0 的写出
 1048576字节(1.0 MB)已复制，0.118967 秒，8.8 MB/秒
 ```
 
-TF卡分区
-
- # ***sfdisk --in-order -uM /dev/mmcblk0***
-
-```
-Checking that no-one is using this disk right now ...
-OK
-
-Disk /dev/mmcblk0: 486192 cylinders, 4 heads, 16 sectors/track
-
-sfdisk: ERROR: sector 0 does not have an msdos signature
-/dev/mmcblk0: unrecognized partition table type
-Old situation:
-No partitions found
-Input in the following format; absent fields get a default value.
-<start> <size> <type [E,S,L,X,hex]> <bootable [-,*]> <c,h,s> <c,h,s>
-Usually you only need to specify <start> and <size> (and perhaps <type>).
-```  
-/dev/mmcblk0p1 : ***1,16,c***
-```
-/dev/mmcblk0p1 1 16 16 16384 c W95 FAT32 (LBA)
-```  
-/dev/mmcblk0p2 : ***,,L***
-```  
-/dev/mmcblk0p2 17 15193- 15177- 15540736 83 Linux
-/dev/mmcblk0p3 :
-/dev/mmcblk0p3 0 - 0 0 0 Empty
-/dev/mmcblk0p4 :
-/dev/mmcblk0p4 0 - 0 0 0 Empty
-New situation:
-Units = mebibytes of 1048576 bytes, blocks of 1024 bytes, counting from 0
-
-Device Boot Start End MiB #blocks Id System
-/dev/mmcblk0p1 1 16 16 16384 c W95 FAT32 (LBA)
-/dev/mmcblk0p2 17 15193- 15177- 15540736 83 Linux
-/dev/mmcblk0p3 0 - 0 0 0 Empty
-/dev/mmcblk0p4 0 - 0 0 0 Empty
-Warning: no primary partition is marked bootable (active)
-This does not matter for LILO, but the DOS MBR will not boot this disk.
-Do you want to write this to disk? [ynq] y
-Successfully wrote the new partition table
-
-Re-reading the partition table ...
-
-If you created or changed a DOS partition, /dev/foo7, say, then use dd(1)
-to zero the first 512 bytes: dd if=/dev/zero of=/dev/foo7 bs=512 count=1
-(See fdisk(8).)
-```
-
-*注：此步完成后，请执行以下命令，用于确定你的tf卡是否兼容linux的分区软件。*
+TF卡重新分区
 
  # ***fdisk -l /dev/mmcblk0***
 ```
@@ -105,8 +56,8 @@ I/O size (minimum/optimal): 512 bytes / 512 bytes
 Disk identifier: 0x00000000
 
 Device Boot Start End Blocks Id System
-/dev/mmcblk0p1 2048 34815 16384 c W95 FAT32 (LBA)
-/dev/mmcblk0p2 34816 31116287 15540736 83 Linux
+/dev/sdb1 2048 34815 16384 c W95 FAT32 (LBA)
+/dev/sdb2 34816 31116287 15540736 83 Linux
 ```
 
 *注：请注意上面第一个分区的'/dev/mmcblk0p1 2048'，如果此处值不为2048，说明linux对你的卡不兼容，不支持这种制引导区方式。目前已知一种杂牌只有类似SD-C02G TAIWAN的卡不支持（移动送的，好东西，也不送你）。*  
@@ -114,13 +65,13 @@ Device Boot Start End Blocks Id System
 *使用berryboot-cubieboard等img文件在windows下刷到TF卡，安装系统完成后。拿到linux下接着往下执行，相当于使用已经分区的卡进行安装。如果哪位对这种无法识别的卡有更好的方法，请告诉我。*
 
 将第一分区格式化成vfat格式  
- # ***mkfs.vfat /dev/mmcblk0p1***  
+ # ***mkfs.vfat /dev/sdb1***  
 ```
 mkfs.vfat 3.0.13 (30 Jun 2012)
 ```
 
 将第二分区格式化成ext4格式，看你的卡的容量，可能要稍等一会儿。  
- # ***mkfs.ext4 /dev/mmcblk0p2*** 
+ # ***mkfs.ext4 /dev/sdb2*** 
 ``` 
 mke2fs 1.42.5 (29-Jul-2012)
 Discarding device blocks: 完成
@@ -147,10 +98,10 @@ Writing superblocks and filesystem accounting information: 完成
 
 **3. 建立引导**
 
- # ***git clone https://github.com/linux-sunxi/u-boot-sunxi.git***  
- # ***cd u-boot-sunxi/***  
+ # ***git clone https://github.com/daiyoko/u-boot.git***  
+ # ***cd u-boot/***  
  # ***make distclean CROSS_COMPILE=arm-linux-gnueabihf-***  
- # ***make cubieboard CROSS_COMPILE=arm-linux-gnueabihf-***
+ # ***make cubieboard2 CROSS_COMPILE=arm-linux-gnueabihf-***
 ```
 …………
 …………
@@ -164,14 +115,14 @@ make[2]:正在离开目录 `/root/cubieboard/u-boot-sunxi/examples/api'
 make[1]:正在离开目录 `/root/cubieboard/u-boot-sunxi'
 ```
 
- # ***dd if=spl/sunxi-spl.bin of=/dev/mmcblk0 bs=1024 seek=8***
+ # ***dd if=spl/sunxi-spl.bin of=/dev/sdb bs=1024 seek=8***
 ```
 记录了20+0 的读入
 记录了20+0 的写出
 20480字节(20 kB)已复制，0.0129492 秒，1.6 MB/秒
 ```
 
- # ***dd if=u-boot.bin of=/dev/mmcblk0 bs=1024 seek=32***
+ # ***dd if=u-boot.bin of=/dev/sdb bs=1024 seek=32***
 ```
 记录了168+1 的读入
 记录了168+1 的写出
@@ -186,13 +137,13 @@ make[1]:正在离开目录 `/root/cubieboard/u-boot-sunxi'
 
 下载内核源码，如果通过git下载可能时间较长。
 
- # ***git clone git://github.com/linux-sunxi/linux-sunxi.git***
+ # ***git clone https://github.com/daiyoko/linux-sunxi.git***
 
  # ***cd linux-sunxi/***
 
-使用sun4i的默认配置*（第一次编译时使用）*
+使用sun7i的默认配置*（第一次编译时使用）*
 
- # ***make ARCH=arm sun4i_defconfig***
+ # ***make ARCH=arm cubieboard2_defconfig***
 ```
 #
 # configuration written to .config
@@ -218,6 +169,8 @@ scripts/kconfig/mconf Kconfig
 # configuration written to .config
 #
 
+
+註：要選擇支援 2 TB 功能，因為 ext4 需要。
 
 *** End of the configuration.
 *** Execute 'make' to start the build or try 'make help'.
